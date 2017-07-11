@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<StructureSpecificDataQuery xmlns="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/message">
+  <!--NSI Web client v3.11.0.0-->
+  <Header>
+    <ID>IDREF2</ID>
+    <Test>false</Test>
+    <Prepared>2017-07-05T21:05:40.8361318+02:00</Prepared>
+    <Sender id="Unknown" />
+    <Receiver id="Unknown" />
+  </Header>
+  <Query>
+    <ReturnDetails detail="Full" observationAction="Active" xmlns="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/query">
+      <LastNObservations>0</LastNObservations>
+      <Structure dimensionAtObservation="TIME_PERIOD" structureID="StructureId">
+        <Structure xmlns="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/common">
+          <Ref agencyID="UNSD" id="DSD_WPP_UNDATA" version="1.0" xmlns="" />
+        </Structure>
+      </Structure>
+    </ReturnDetails>
+    <DataWhere xmlns="http://www.sdmx.org/resources/sdmxml/schemas/v2_1/query">
+      <Dataflow>
+        <Ref agencyID="UNSD" id="DF_UNDATA_WPP" version="1.0" xmlns="" />
+      </Dataflow>
+      <Or>
+        <DimensionValue>
+          <ID>INDICATOR</ID>
+          <Value operator="equal">SM_POP_NMRT</Value>
+        </DimensionValue>
+      </Or>
+    </DataWhere>
+  </Query>
+</StructureSpecificDataQuery>

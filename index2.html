@@ -1,0 +1,31 @@
+<html>
+<script>
+
+function loadXMLDoc(){
+    var xmlP = new XMLHttpRequest();
+    xmlP.onload = function(e) {
+       return xmlP.response;
+    };
+    xmlP.open("GET", "/UNSD+DF_UNDATA_WPP+1.0_2017_07_05_21_05_40.query.xml", true);
+    xmlP.send();
+}
+    
+    
+var xmlHttp =  new XMLHttpRequest();
+// creatng the xmlHttp object
+
+// Calling the web service using post and true means asynchronous call
+xmlHttp.open("POST", "http://data.un.org/WS/NSIEstatV20Service.asmx", true);
+ 
+// Setting the request header to let the web service find the soap request we would be sending
+xmlHttp.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+ 
+xmlHttp.setRequestHeader("SOAPAction", "http://ec.europa.eu/eurostat/sri/service/2.0/extended/GetCompactData");
+ 
+var soapRequest = loadXMLDoc();
+ 
+xmlHttp.send(soapRequest);
+
+    
+</script>
+</html>

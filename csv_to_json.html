@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+    </head>
+    
+    <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+
+<body> 
+    <script type="text/javascript" src = "/csvParse1.js"></script>
+    
+    <script>
+var data = [];
+           
+setCountries(["ANGOLA", "INDONESIA", "KENYA", "NIGERIA", "NEPAL","JORDAN", "SOUTH SUDAN", "SUDAN", "SIERRA LEONE"]);
+        
+
+var collectedData = coagData(["undernourishment.csv", "perCapitaFoodSupply.csv", "internetUsers.csv", "poverty.csv"], data, 0, function(dat){
+      dat.pop(); // removes unecessary country tag
+    var year = 2000;
+    d3.select("body")
+      .data(dat)
+      .enter()
+      .append("p")
+      .text(function(d){
+            console.log(d["perCapitaFoodSupply.csv"] = d["perCapitaFoodSupply.csv"]); 
+            return d.key + " " + year +" poverty rate: "+ d["perCapitaFoodSupply.csv"]["values"][0][year] + "%";});
+      
+        
+        });
+
+/*function test(){
+d3.csv("/perCapitaFoodSupply.csv", function(data){
+    d3.csv("/undernourishment.csv", function(data2) {
+        var foodData = d3.nest()
+                         .key(d => d['Country name'])
+                         .entries(data);
+    
+       var undernourishmentData = d3.nest()
+                                    .key(d => d['Country name'])
+                                    .entries(data2);
+      
+        var result = join(foodData, undernourishmentData);
+    })})
+}*/   
+/*function conCat(){
+    var fs = require("fs");
+    var source = "/dataFiles";
+    fs.readdir(source, function(files, err){
+        if (err){
+            console.log("error: " + err)
+            process.exit(1);//closes process
+        }
+        files.forEach(function (file){
+            var filePath = path.join(source, file); //filePath
+            console.log(filePath);
+            d3.csv(filePath, function(data){
+                   var testData = d3.nest()
+                                    .key(d => d['Country name'])
+                                    .entries(data);
+                    console.log(testData);
+                   
+            }
+            )
+
+                              
+                              
+
+            
+            
+            
+            
+            
+        })
+        
+        
+        
+        
+        
+        
+        
+  })
+}*/
+/*function join(lookupTable, mainTable, lookupKey, mainKey, select){
+    var l = lookupTable.length,
+        m = mainTable.length,
+        lookupIndex = [],
+        output = [];
+    for (var i = 0; i < l; i++){
+        var row = lookupTable[i];
+        lookupIndex[row[lookupKey]] = row;
+    }
+    
+    for (var j = 0; j < m; j++){
+        var y = mainTable[j];
+        var x = lookupIndex[y[mainKey]];
+        output.push(select(y, x));
+        
+    }
+    return output;
+    
+}
+function loadData(){
+var q =d3.queue()
+
+q.defer(d3.csv, '/undernourishment.csv')
+ .defer(d3.csv, '/perCapitaFoodSupply.csv')
+ .await(processData);
+}
+function processData (data1, data2){}*/
+
+    </script>
+    </body>
+ 
+</html>
