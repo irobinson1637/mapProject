@@ -1,4 +1,4 @@
-function getKey (countryId){
+function getKey (countryId, direction, key){ // direciton of 1 means country:id, direction of 0 means id:country
 var keys = ["Afghanistan:004",
 "Åland Islands:248",
 "Albania:008",
@@ -58,7 +58,7 @@ var keys = ["Afghanistan:004",
 "Cuba:192",
 "Curaçao:531",
 "Cyprus:196",
-"Czechia:203",
+"Czech Rep.:203",
 "Denmark:208",
 "Djibouti:262",
 "Dominica:212",
@@ -181,7 +181,7 @@ var keys = ["Afghanistan:004",
 "Qatar:634",
 "Réunion:638",
 "Romania:642",
-"Russian Federation (the):643",
+"Russian Federation:643",
 "Rwanda:646",
 "Saint Barthélemy:652",
 "Saint Helena: Ascension and Tristan da Cunha:654",
@@ -208,7 +208,7 @@ var keys = ["Afghanistan:004",
 "South Sudan:728",
 "Spain:724",
 "Sri Lanka:144",
-"Sudan (the):729",
+"Sudan:729",
 "Suriname:740",
 "Svalbard and Jan Mayen:744",
 "Swaziland:748",
@@ -234,7 +234,7 @@ var keys = ["Afghanistan:004",
 "United Arab Emirates (the):784",
 "United Kingdom of Great Britain and Northern Ireland (the):826",
 "United States Minor Outlying Islands (the):581",
-"United States of America (the):840",
+"United States:840",
 "Uruguay:858",
 "Uzbekistan:860",
 "Vanuatu:548",
@@ -248,12 +248,52 @@ var keys = ["Afghanistan:004",
 "Zambia:894",
 "Zimbabwe:716"]
 
-var countryObjects = new Object();
-for(var i = 0; i<keys.length; i++){
-    var parsedCount = keys[i].split(":");
+
+function makeObjects(){
+    var bigObject = new Object();
+    for(var i = 0; i<keys.length; i++){
+        
+        var parsedCount = keys[i].split(":");
+        
+        /*var ob = {
+        [parsedCount[0]]: parsedCount[1],
+            }
+        
+        oArray.push(ob);*/
+        bigObject[parsedCount[0]] = {name : parsedCount[0], code: parsedCount[1]}
+    }
+
+    return bigObject;
     
-    countryObjects[parsedCount[1]] = parsedCount[0];
 }
-    return (countryObjects[countryId]);
     
+function makeKey(){
+    var countryObjects = new Object();
+        for(var i = 0; i<keys.length; i++){
+            var parsedCount = keys[i].split(":");
+            if(direction == 1) //direction of 1 meaning country:key
+            {
+                countryObjects[parsedCount[0]] = parsedCount[1];
+            }else{
+                countryObjects[parsedCount[1]] = parsedCount[0];
+            } 
+    
+        }
+    
+    if (typeof countryId != "undefined"){
+    return (countryObjects[countryId]);
+    }
+    
+    return countryObjects;
+}
+
+
+if(key == true){
+   return  makeKey();
+}
+return makeObjects();
+
+
+
+
 }

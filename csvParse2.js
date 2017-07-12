@@ -1,7 +1,12 @@
-function csvParse(callback){
+function csvParse(callback){ //direction of 1 is country:id
     console.log("runnign");
-      var primeroCountries = [ Nepal = {name : "Nepal", code:524}, Kenya = {name : "Kenya", code:404}, Jordan = {name : "Jordan", code:400}, Afghanistan = {name : "Afghanistan", code:004}];
+     /* var primeroCountries = [ Nepal = {name : "Nepal", code:524}, Kenya = {name : "Kenya", code:404}, Jordan = {name : "Jordan", code:400}, Afghanistan = {name : "Afghanistan", code:004}];*/
     
+   // var primeroCountries = getKey(undefined, 1) ; //is this bad practice
+    
+    var primeroCountries = getKey();
+
+
     d3.csv("/refugeeData2013.csv", function(data){
         var sortedData = [];
         
@@ -11,29 +16,32 @@ function csvParse(callback){
                 break;
             }
             
-        }
-        var primeroNames = ["Nepal", "Kenya", "Jordan", "Afghanistan"];
+        }   
         
-      
-        
-        for(var i = 0; i<data.length; i++){
-            for (var r = 0; r<primeroNames.length; r++){
-                var country = data[i]["Country or territory of asylum or residence"] //gets current country object name
-                
-                if (data[i]["Country or territory of origin"] == primeroNames[r]){ //if it is a primero country 
-                    
-                    primeroCountries[r][country] = data[i]["Refugees<sup>*</sup>"];
-                } 
-            }
+        /*for(var i = 0; i<data.length; i++){
+            var country = data[i]["Country or territory of asylum or residence"]; //gets current country object name
+            var origin = data[i]["Country or territory of origin"];
+            if(country in primeroCountries){
+                primeroCountries[country][origin] = data[i]["Refugees<sup>*</sup>"];
+        }else{
             
         }
-         
-    
-    }
        
+    }*/
+       for(var i = 0; i<data.length; i++){
+            var residence = data[i]["Country or territory of asylum or residence"]; //gets current country object name
+            var country = data[i]["Country or territory of origin"];
+            if(country in primeroCountries){
+                primeroCountries[country][residence] = data[i]["Refugees<sup>*</sup>"];
+        }else{
+            
+        }
+       
+    }
+        console.log(primeroCountries);
           
-          );
+          
 
    callback(primeroCountries);
     
-}
+});}
