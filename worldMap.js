@@ -5,7 +5,10 @@ function buildMap(countryData){
     var moveTo; //will later store coordinates of end country    
     var key = {"United States":840}    
 
-
+    var scale = d3.scaleSqrt();
+    scale.domain([0, 100]);
+    scale.range([0, 90]);
+    
     var svg = d3.select("body")
     .append("svg")
     .attr("height", height)
@@ -27,6 +30,8 @@ function buildMap(countryData){
     .datum(d3.geoGraticule10())
     .attr("class", "graticule")
     .attr("d", path);
+    
+    var dataSet = countryData; 
 
 
 
@@ -36,14 +41,18 @@ function buildMap(countryData){
         var countries = svg.append("g") //builds map
         .attr("class", "states")
         .selectAll("path")
+        
         .data(topojson.feature(world, world.objects.countries).features)
+        
         .enter()
         .append("path")
         .attr("d", path)
         .attr("id",d => d.id)
-        .on("click", function(d){console.log(d.id)});
-
-
+        .on("click", function(d){
+         //   d3.select(this).style("fill", "magenta");
+            drawLines(d.id);
+        
+        });
 
         var border = svg.append("path") //creates white borders
         .datum(topojson.mesh(world, world.objects.countries, function(a, b){ return a !== b;}))
@@ -57,65 +66,9 @@ function buildMap(countryData){
          .attr("class", "staticCircle");
 
 
-        var dataSet = countryData; //passed in parsed data from csvParse2
+        //passed in parsed data from csvParse2
 
-        d3.selectAll("path")
-        .each(function (d,i){
-            var centroid = path.centroid(d); //cetnroid equal to center of each country
-
-            var index = dataSet.findIndex(countr => countr.code == d.id); //finds index of country with said iso 3-letter code
-
-            if(typeof dataSet[index] != 'undefined'){ //checks if it is a primero country
-
-            var size = dataSet[index]["United States"]; //sets size equal to immigration to US
-                
-
-            }else{
-            var size = 0;
-            }
-         console.log(getKey("188"));
-            var state = d3.select("[id='076']");
-            moveTo = path.centroid(state.datum());
-
-            svg.append("line")
-                .datum(centroid)
-                .attr("x1", centroid[0])
-                .attr("x2", moveTo[0])
-                .attr("y1", centroid[1])
-                .attr("y2", moveTo[1])
-                .style("stroke", "red")
-                .style("stroke-width", size/300);
-            
-            svg.append("rect")
-                .attr("x", 50)
-                .attr("y", 50)
-                .attr("height", 50)
-                .attr("width", 50)
-                .style("fill", "blue");
-
-            movingCircles.append("circle")
-                .datum(centroid)
-                .attr("cx", centroid[0])
-                .attr("cy", centroid[1])
-                .attr("r",size/200)
-                .style("fill", "red");
-                //.on("click", trans());
-          
-           
-            staticCircle.append("circle")
-                .datum(centroid)
-                .attr("cx", centroid[0])
-                .attr("cy", centroid[1])
-                .attr("r",size/200)
-                .style("fill", "red");
-                
-            staticCircle.append("circle")
-                .attr("cx", moveTo[0])
-                .attr("cy", moveTo[1])
-                .attr("r",size/200)
-                .style("fill", "red");
-      
-              });
+        
 
         function trans(){
             console.log("transformation called");
@@ -129,10 +82,7 @@ function buildMap(countryData){
                     update(trans()); 
                 } 
                 
-                console.log("d: " + Math.round(d[0]) + "also d: " + Math.round(d[1]));
 
-                                      
-                                      
                                       
                                       
                                       })};
@@ -141,11 +91,92 @@ function buildMap(countryData){
             console.log("update");
             movingCircles.selectAll("circle").transition().duration(0).delay(3000).attr("cx", d => d[0]).attr("cy", d => d[1]).on("end", callback);
             };
-        function drawLine(){
+        
+        function drawLines(countryID){
+          
+        svg.selectAll("line").remove();
+        svg.selectAll("circle").remove();
+        svg.select("rect").remove();
             
+        d3.selectAll("path")
+        .each(function (d,i){
+            var centroid = path.centroid(d); //cetnroid equal to center of each country
+
+            //var index = dataSet.findIndex(countr => countr.code == d.id); //finds index of country with said iso 3-letter code
+
+                
+                var temp = dataSet[getKey(countryID, 0, true)]; //selects selected country object
+            
+                 
+                var size = temp[getKey(d.id,0,true)]; //as it loops through each country, get's the data associated with the attribute of selected country associated with that country
+            
+                if (typeof size == 'undefined'){ //better wat to do this without wasting memory by assigning size a value just to reassign it to 0
+                    size = 0;
+                }else{
+                    size = scale(size);
+                }
+
+          //  console.log(scale(50));
+            //var size = dataSet[getKey(d.id)]; //sets size equal to immigration to US
+                
+
+            var state = d3.select("[id='"+countryID+"']");
+            moveTo = path.centroid(state.datum());
+            
+        
+            svg.append("line")
+                .attr("class", "countryLines")
+                .datum(centroid)
+                .attr("x1", centroid[0])
+                .attr("x2", moveTo[0])
+                .attr("y1", centroid[1])
+                .attr("y2", moveTo[1])
+                .style("stroke", "red")
+                .style("stroke-width", size/300)
+                .style("opacity", 0.2);
+            
+            svg.append("rect")
+                .attr("class", "lonely-square")
+                .attr("x", 10)
+                .attr("y", 10)
+                .attr("width", 20) 
+                .attr("height", 20)
+                .style("fill", "blue")
+                .on("click", function(d){
+                    console.log("clicked!");
+                trans();
+                    
+                    
+                
+                });
+                
+            
+          
+            staticCircle.append("circle")
+                .datum(centroid)
+                .attr("cx", centroid[0])
+                .attr("cy", centroid[1])
+                .attr("r",size/200)
+                .style("fill", "red");
+                
+            staticCircle.append("circle")
+                .attr("cx", moveTo[0])
+                .attr("cy", moveTo[1])
+                .attr("r",size/200)
+                .style("fill", "none");
+            
+            movingCircles.append("circle")
+                .datum(centroid)
+                .attr("cx", centroid[0])
+                .attr("cy", centroid[1])
+                .attr("r",size/200)
+                .style("fill", "red");
+              //  .on("click", trans());
+      
+              });
         }
 
-        d3.select(window).on("load", trans());   
+       
     }
            );
        };
