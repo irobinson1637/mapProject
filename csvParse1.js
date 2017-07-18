@@ -42,16 +42,17 @@ function coagData (files, dataArray, startAt, callback){
         dataArray.push(sort(data5, files[startAt]));
         
         if(startAt == files.length-1){//if last file has been loaded
-            callback(join(dataArray));
+          callback(join(dataArray));
+          
         }else{
-        
             startAt++;
             coagData(files, dataArray, startAt, callback)
     
-    
         }
-    }
+
+    } 
            )
+  
 }
         
     
