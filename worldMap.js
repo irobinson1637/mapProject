@@ -15,30 +15,73 @@ function clear(){
               d3.select("body").select(".mapSVG").select(".countries").selectAll("path").style("fill", "black"); 
 }
 
+function reDraw(){
+    
+    var topPanel = d3.select(".divElement").append('svg').attr("width", '90%').attr("height", '35%').attr("class", "panelSVG").attr("fill", "blue");
+    
+    
+      topPanel.append("g").attr("class", "xaxis");
+      topPanel.append("g").attr("class", "yaxis");
+      topPanel.append("defs").append("clipPath").attr("id", "clip");
+      topPanel.attr("transform", "translate(0," + 30 + ")");
+    
+    return topPanel;
+    
+    }
 
 function buildMap(countryData){
-
+    var primeCountries = ["ANGOLA", "INDONESIA", "KENYA", "NIGERIA", "NEPAL","JORDAN", "SOUTH SUDAN", "SUDAN", "SIERRA LEONE"]
     var data = []; //convert to object?
-    setCountries(["ANGOLA", "INDONESIA", "KENYA", "NIGERIA", "NEPAL","JORDAN", "SOUTH SUDAN", "SUDAN", "SIERRA LEONE"]);
+    setCountries(primeCountries);
 
+    primeCountries = ["Angola", "Indonesia", "Kenya", "Nigeria", "Nepal","Jordan", "South Sudan", "Sudan", "Sierra Leone"]
+        
     var scale = d3.scaleSqrt();
     scale.domain([0, 100]);
     scale.range([0, 90]);
     
+    var divElement = d3.select("body").append("div").attr("class", "divElement");
+
+    var countCode;
+
     
-  var sidePanel = d3.select("body").append('svg').attr("width", '100%').attr("height", '22%').attr("class", "panelSVG");/*.append("rect").attr("x", 40)
-            .attr("y", -10)
-            .attr("width", 30)
-            .attr("height", 50)
-            .style("fill", d3.rgb(0,70,200));*/
+   var svg = divElement.append('svg').attr("width", '70%').attr("height", '100%').attr("class", "mapSVG");
+   svg.append("text").attr("class", "txtField").attr("x", 100).attr("y", 50).text("");
     
-    graphWidth = parseInt(sidePanel.style("width"));
-    graphHeight = parseInt(sidePanel.style("height"));
+    
+   var sidePanel = divElement.append("svg").attr("width", "30%").attr("height", "100%").attr("class", "sidePanel");
+    
+    var topPanel = reDraw();
+      
+    graphWidth = parseInt(topPanel.style("width"));
+    graphHeight = parseInt(topPanel.style("height"));
+    
+    sidePanel.append('g').attr("class", "graph").selectAll('rect')
+            .data(primeCountries)
+            .enter()
+            .append('rect')
+            .attr("class", "countrySelect")
+            .attr("x", 0)
+            .attr("y", function(d,i){return i*(parseInt(sidePanel.style("height"))/9)})
+            .attr("height", parseInt(sidePanel.style("height"))/9)
+            .attr("width", parseInt(sidePanel.style("width")))
+            .style("stroke", "black");
     
 
     
-   var svg = d3.select("body").append('svg').attr("width", '100%').attr("height", '68%').attr("class", "mapSVG");
-   svg.append("text").attr("class", "txtField").attr("x", 100).attr("y", 50).text("i");
+    sidePanel.select(".graph").selectAll("text")
+            .data(primeCountries)
+            .enter()
+            .append('text')
+            .attr("class", "countryLabels")
+            .attr("x", parseInt(sidePanel.style("width"))/2)
+            .attr("text-anchor", "middle")
+            .attr("y", function(d,i){return parseInt((i+0.6)*(parseInt(sidePanel.style("height"))/9)) }) //shift labels down so that they ligne up with les boits
+            .style("fill", "white")
+            .text(d=>d);
+    
+   
+  
     
     mapWidth = parseInt(svg.style("width"));
     mapHeight = parseInt(svg.style("height"));
@@ -84,8 +127,8 @@ function buildMap(countryData){
         
    
 })
+    
     }
-
 function updateMap(countryData, year){
     var svg = d3.select(".mapSVG");
     var panelSVG = d3.select(".panelSVG");
@@ -108,6 +151,7 @@ function updateMap(countryData, year){
     graphScale.range([0, 75]);
 
     var countries = svg.select(".states");
+    
     countries.selectAll("path").style("fill", "black"); 
     var selectedCountryObject;
     
@@ -144,19 +188,45 @@ function updateMap(countryData, year){
             d3.select(this).style("fill", d3.rgb(100,20,100));
             clearAll();
             selectedCountryObject = d;
-            console.log("d");
-            console.log(d);
-            console.log("data");
-            console.log(d.data);
             prevCountry = d;
             drawLines(d.id);
             drawBars(d.id, parsed);
             prevCountry = d.id;
+            console.log(d);
             //trans(); //commented for faster testing but apparentely redundant
         
         });
+    d3.select(".sidePanel")
+      .selectAll("rect")
+      .on("click", function(d){
+           var countKey = getKey(0, false);
+           var country = d;
+           countCode = countKey[country].code;
+        
+       var countElement = countries.selectAll("path")
+       .select("[id=" + "'" + countCode.toString() + "'" +"]");
+        
+        countries.selectAll("path").each(function(d,i){
+            if(d.id == countCode){
+            
+                countries.selectAll("path").style("fill", "black"); 
+                d3.select(this).style("fill", d3.rgb(100,20,100));
+                clearAll();
+                selectedCountryObject = d;
+                prevCountry = d;
+                drawLines(d.id);
+                drawBars(d.id, parsed);
+                prevCountry = d.id;
+                console.log(d);
 
+            }
+            
+        })
+     
+       
+   
 
+    })
         function trans(){
             movingCircles.selectAll("circle")
                 .transition()
@@ -181,15 +251,20 @@ function updateMap(countryData, year){
         function update(callback){
             movingCircles.selectAll("circle").attr("cx", selectedCenter[0]).attr("cy", selectedCenter[1]).on("end", callback);
         };
+    
+    
+    
+    
+    
+    
+    
         
-         function drawBars(countryID, parsedData){
+      /*   function drawBars(countryID, parsedData){
 
           for(var y1 = 0; y1<parsedData.length; y1++){
               var lowerString = parsedData[y1].key;
-              console.log(parsedData[y1]);
               var countryName = getKey(countryID,0, true);
-              console.log(countryName.toLowerCase());
-               console.log(lowerString.toLowerCase());
+     
               try{
             if(lowerString.toLowerCase() == countryName.toLowerCase()) {
                 var numbersOnly = Object.values(parsedData[y1]['perCapitaFoodSupply.csv']['values'][0]);
@@ -212,7 +287,7 @@ function updateMap(countryData, year){
                     })
                     .attr("width", function(d, i){ return graphWidth / numbersOnly.length - (barPadding)})
                     .style("fill", function(d) {
-					return "rgb(0, 0, " + (d * 10) + ")";
+return "rgb(0, 0, " + (d * 10) + ")";
                 })
                 
                 
@@ -224,20 +299,22 @@ function updateMap(countryData, year){
           .domain(d3.extent(numbersOnly, d => d))
           .range([graphHeight-(bottomMargin), 0]);
                 
-        var xAxis = d3.axisBottom(x).ticks(50);
-        var yAxis = d3.axisLeft(y);
-        var gHeight = graphHeight - bottomMargin;
-                
-      panelSVG.append("g")
+    var xAxis = d3.axisBottom(x).ticks(50);
+    var yAxis = d3.axisLeft(y);
+    var gHeight = graphHeight - bottomMargin;
+    
+      panelSVG.select(".xaxis")
       .attr("transform", "translate(0,"+ gHeight +")")
       .call(xAxis);
-                                
-      panelSVG.append("g")
+         
+      panelSVG.select(".yaxis")
       .attr("transform", "translate("+leftMargin+",0)")
       .call(yAxis);
-
-             
-                break;
+                
+    
+        break;
+                
+                
             }}catch(err){
                 console.log(err);
                 alert("No country found with id: " + countryID);//no country with corresponding id; path mixup
@@ -246,8 +323,169 @@ function updateMap(countryData, year){
     } 
     
     };
+    */
+   
+    function drawBars(countryID, parsedData){
+console.log(parsedData.length);
+        d3.select(".panelSVG").remove();
+        reDraw();
+
+          for(var y1 = 0; y1<parsedData.length; y1++){
+              console.log("y1: " + y1);
+              var lowerString = parsedData[y1].key;
+              var countryName = getKey(countryID,0, true);
+              
+            try{
+                console.log(lowerString);
+                console.log(countryName);
+            if(lowerString.toLowerCase() == countryName.toLowerCase()) {
+                var numbersOnly = Object.values(parsedData[y1]['perCapitaFoodSupply.csv']['values'][0]);
+                var keys = Object.keys(parsedData[y1]['perCapitaFoodSupply.csv']['values'][0]);
+                
+                numbersOnly = numbersOnly.slice(0, numbersOnly.length-2); //get's rid of country tag
+                keys = keys.slice(0, keys.length-2); //years for axis labels
+
+                var dataStoreFinal = [];
+                for(var t =0; t<keys.length; t++){
+                    dataStoreFinal.push([keys[t], numbersOnly[t]]);
+                }
+                console.log(dataStoreFinal);
+                
+var svg = d3.select(".panelSVG"),
+    margin = {top: 5, right: 5, bottom: 20, left: 50},
+    margin2 = {top: 5, right: 5, bottom: 20, left: 50},
+    width = graphWidth;
+    height = (3 * graphHeight)/4;
+    height2 = graphHeight/4;
+
+var parseDate = d3.timeParse("%Y");
+
+var x = d3.scaleTime().range([0, width]),
+    x2 = d3.scaleTime().range([0, width-graphWidth/3]),
+    y = d3.scaleLinear().range([height, 0]),
+    y2 = d3.scaleLinear().range([height2, 0]);
+
+var xAxis = d3.axisBottom(x),
+    xAxis2 = d3.axisBottom(x2),
+    yAxis = d3.axisLeft(y);
+
+var brush = d3.brushX()
+    .extent([[0, 0], [width, height2]])
+    .on("brush end", brushed);
+
+var zoom = d3.zoom()
+    .scaleExtent([1, Infinity])
+    .translateExtent([[0, 0], [width, height]])
+    .extent([[0, 0], [width, height]])
+    .on("zoom", zoomed);
+
+var area = d3.area()
+    .curve(d3.curveMonotoneX)
+    .x(function(d) { return x(d[0]); })
+    .y0(height)
+    .y1(function(d) { return y(d[1]); });
+
+var area2 = d3.area()
+    .curve(d3.curveMonotoneX)
+    .x(function(d) { return x2(d[0]); })
+    .y0(height2)
+    .y1(function(d) { return y2(d[1]); });
+
+svg.select("#clip")
+  .append("rect")
+    .attr("width", width)
+    .attr("height", height);
+
+var focus = svg.append("g")
+    .attr("class", "focus")
+    .attr("transform", "translate(" + margin.left + "," + 0 + ")");
+
+var context = svg.append("g")
+    .attr("class", "context")
+    .attr("transform", "translate(" + margin2.left + "," + (3 * graphHeight)/4 + margin2.top + ")");
+
+
+  x.domain([1961, 2011]);
+  y.domain([1500, 3000]);
+  x2.domain(x.domain());
+  y2.domain(y.domain());
+
+  focus.append("path")
+      .datum(dataStoreFinal)
+      .attr("class", "area")
+      .attr("d", area);
+
+  focus.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  focus.append("g")
+      .attr("class", "axis axis--y")
+      .attr("transform", "translate(0," + graphHeight/10 + ")")
+      .call(yAxis);
+
+  context.append("path")
+      .datum(dataStoreFinal)
+      .attr("class", "area")
+      .attr("d", area2);
+
+  context.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height2 + ")")
+      .call(xAxis2);
+
+  context.append("g")
+      .attr("class", "brush")
+      .call(brush)
+      .call(brush.move, x.range());
+
+  svg.append("rect")
+      .attr("class", "zoom")
+      .attr("width", 40)
+      .attr("height", height)
+      .attr("transform", "translate(" + margin.left + "," + (3 * graphHeight)/4 + margin2.top + ")")
+      .call(zoom);
+      break;
+};
+
+function brushed() {
+  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+  var s = d3.event.selection || x2.range();
+  x.domain(s.map(x2.invert, x2));
+  focus.select(".area").attr("d", area);
+  focus.select(".axis--x").call(xAxis);
+  svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+      .scale(width / (s[1] - s[0]))
+      .translate(-s[0], 0));
+}
+
+function zoomed() {
+  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+  var t = d3.event.transform;
+  x.domain(t.rescaleX(x2).domain()); //resets x domain to match little graph
+  focus.select(".area").attr("d", area);
+  focus.select(".axis--x").call(xAxis);
+  context.select(".brush").call(brush.move, x.range().map(t.invertX, t)); //t.invertX
+}
+    
+     
+            }catch(err){
+                console.log(err);
+                alert("No country found with id: " + countryID);//no country with corresponding id; path mixup
+                break;
+            }
+          }
+    }; 
+    
 
         
+    
+    
+    
+    
+    
+
         function drawLines(countryID){
             countryCounter = 0; //reset
             countryChecker = 0; //reset
@@ -256,6 +494,8 @@ function updateMap(countryData, year){
             var selectedCountry = dataSet[getKey(countryID, 0, true)]; //this is actually the object
          
             selectedCenter = path.centroid(selectedCountryObject);
+            console.log("countryObject:");
+            console.log(selectedCountryObject);
 
             countries.selectAll("path").filter(function(d){
         
@@ -305,13 +545,10 @@ function updateMap(countryData, year){
                 .attr("y1", center[1])
                 .attr("y2", selectedCenter[1])
                 .style("stroke", "red")
-                .style("stroke-width", size/200)
-                .style("opacity", 0.5);
+                .style("stroke-width", size/300)
+                .style("opacity", 0.3);
                 
-                
-            
-           /* 
-             staticCircle.append("circle")
+            staticCircle.append("circle")
                 .attr("cx", center[0])
                 .attr("cy", center[1])
                 .attr("r",size/200)
@@ -328,12 +565,13 @@ function updateMap(countryData, year){
                 .attr("cx", selectedCenter[0])
                 .attr("cy", selectedCenter[1])
                 .attr("r",size/200)
-                .style("fill", d3.rgb(100, 0, 20));
-                .on("click", trans()) */
+                .style("fill", d3.rgb(100, 0, 20))
+                .on("click", trans()); 
 
               });
         }
 }
+
     
     
    
