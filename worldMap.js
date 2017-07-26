@@ -10,6 +10,9 @@ var mapWidth;
 var mapHeight;
 var graphWidth;
 var graphHeight;
+var margin = {top: 20, right: 5, bottom: 20, left: 5};
+var margin2 = {top: 20, right: 5, bottom: 20, left: 5};
+var dataSelect = "perCapitaFoodSupply.csv";
 
 function clear(){
               d3.select("body").select(".mapSVG").select(".countries").selectAll("path").style("fill", "black"); 
@@ -17,17 +20,21 @@ function clear(){
 
 function reDraw(){
     
-    var topPanel = d3.select(".divElement").append('svg').attr("width", '90%').attr("height", '35%').attr("class", "panelSVG").attr("fill", "blue");
-    
-    
+    var topPanel = d3.select(".divElement").append('svg').attr("width", '100%').attr("height", '27%').attr("class", "panelSVG").attr("fill", "blue");
+
       topPanel.append("g").attr("class", "xaxis");
       topPanel.append("g").attr("class", "yaxis");
       topPanel.append("defs").append("clipPath").attr("id", "clip");
-      topPanel.attr("transform", "translate(0," + 30 + ")");
-    
+     // topPanel.attr("transform", "translate(0," + 30 + ")");
     return topPanel;
     
     }
+function updateYear(yearChanged){
+    console.log('updateYearClale');
+    console.log(yearChanged);
+    d3.select('.yearText').text(yearChanged);
+    
+}
 
 function buildMap(countryData){
     var primeCountries = ["ANGOLA", "INDONESIA", "KENYA", "NIGERIA", "NEPAL","JORDAN", "SOUTH SUDAN", "SUDAN", "SIERRA LEONE"]
@@ -45,27 +52,49 @@ function buildMap(countryData){
     var countCode;
 
     
-   var svg = divElement.append('svg').attr("width", '70%').attr("height", '100%').attr("class", "mapSVG");
+   var svg = divElement.append('svg').attr("x", 0).attr("y", 0).attr("width", '80%').attr("height", '73%').attr("class", "mapSVG");
    svg.append("text").attr("class", "txtField").attr("x", 100).attr("y", 50).text("");
     
+   var sidePanel = divElement.append("svg").attr("width", "20%").attr("height", "70%").attr("class", "sidePanel");
+
+    sidePanel.append('text').attr("class", "yearText").attr("x", parseInt(sidePanel.style("width"))/3).attr("y", parseInt(sidePanel.style("height"))/15).style("stroke", "black").text("");
     
-   var sidePanel = divElement.append("svg").attr("width", "30%").attr("height", "100%").attr("class", "sidePanel");
     
     var topPanel = reDraw();
       
     graphWidth = parseInt(topPanel.style("width"));
     graphHeight = parseInt(topPanel.style("height"));
     
+  
+    
+    /* sidePanel.attr("class", "yearShow").append("rect")
+            .attr("y", 0)
+            .attr("height", parseInt(sidePanel.style("height"))/11)
+            .attr("width", parseInt(sidePanel.style("width")))
+            .attr("rx", 20)
+            .attr('ry', 20)
+            .style("border", "px")
+            .style("stroke-width", "2px");
+    */
+ 
+    
+    
+
     sidePanel.append('g').attr("class", "graph").selectAll('rect')
             .data(primeCountries)
             .enter()
             .append('rect')
             .attr("class", "countrySelect")
-            .attr("x", 0)
-            .attr("y", function(d,i){return i*(parseInt(sidePanel.style("height"))/9)})
-            .attr("height", parseInt(sidePanel.style("height"))/9)
-            .attr("width", parseInt(sidePanel.style("width")))
+            .attr("x", margin.right)
+            .attr("y", function(d,i){return (i+1)*(parseInt(sidePanel.style("height"))/10)})
+            .attr("height", parseInt(sidePanel.style("height"))/11)
+            .attr("width", parseInt(sidePanel.style("width")) - margin.right - margin.left)
+            .attr("rx", 20)
+            .attr('ry', 20)
+            .style("border", "2px")
+            .style("stroke-width", "2px")
             .style("stroke", "black");
+
     
 
     
@@ -76,8 +105,8 @@ function buildMap(countryData){
             .attr("class", "countryLabels")
             .attr("x", parseInt(sidePanel.style("width"))/2)
             .attr("text-anchor", "middle")
-            .attr("y", function(d,i){return parseInt((i+0.6)*(parseInt(sidePanel.style("height"))/9)) }) //shift labels down so that they ligne up with les boits
-            .style("fill", "white")
+            .attr("y", function(d,i){return parseInt((i+1.6)*(parseInt(sidePanel.style("height"))/10)) }) //shift labels down so that they ligne up with les boits
+            .style("fill", "black")
             .text(d=>d);
     
    
@@ -85,6 +114,8 @@ function buildMap(countryData){
     
     mapWidth = parseInt(svg.style("width"));
     mapHeight = parseInt(svg.style("height"));
+    
+    svg.attr("style", "outline: thin solid blue;").attr("width", mapWidth).attr("height", mapHeight)
     
     var countries = svg.append("g")
     .attr("class", "countries");
@@ -96,9 +127,9 @@ function buildMap(countryData){
          .attr("class", "staticCircle");
 
     var projection = d3.geoPatterson()
-    .scale(130)
-    .translate([mapWidth/2, mapHeight/2])
-    .precision(0.01);
+    .scale(181, 182)
+    .translate([mapWidth/2.5, mapHeight/1.7])
+    .precision(0.1);
 
     var path = d3.geoPath()
     .projection(projection);
@@ -121,14 +152,36 @@ function buildMap(countryData){
         .enter()
         .append("path")
         .attr("d", path)
-        .attr("id",function(d) {prevCountry = d.id; return d.id})
-        .style("stroke-linejoin", "round");
-       });
-        
-   
+        .style("stroke-linejoin", "round")
+        .style("fill", "#a1a1a1")
+        .style("stroke", "#0051a8")
+        .attr("id",function(d) {
+            
+            prevCountry = d.id; 
+      
+            if (primeCountries.indexOf(getKey(d.id,0, true)) > -1 ){
+            d3.select(this).style("fill", "red"); //changes color of primero countries
+
+        }
+          
+            return d.id});
+       })
+  
 })
     
     }
+
+function fillPC(){
+    
+primeCountriesLower = ["Angola", "Indonesia", "Kenya", "Nigeria", "Nepal","Jordan", "South Sudan", "Sudan", "Sierra Leone"]
+ d3.select(".divElement").select(".mapSVG").select(".states").selectAll("path").each(function(d){
+        if (primeCountriesLower.indexOf(getKey(d.id,0, true)) > -1 ){
+            d3.select(this).style("fill", "red");
+        }
+        
+    });
+}
+        
 function updateMap(countryData, year){
     var svg = d3.select(".mapSVG");
     var panelSVG = d3.select(".panelSVG");
@@ -147,12 +200,17 @@ function updateMap(countryData, year){
     var leftMargin = 45;
     var bottomMargin = 25;
     
+
+    
     graphScale.domain([0, 2400]);
     graphScale.range([0, 75]);
 
     var countries = svg.select(".states");
     
-    countries.selectAll("path").style("fill", "black"); 
+    countries.selectAll("path").style("fill", "#a1a1a1");
+    fillPC();
+    
+    
     var selectedCountryObject;
     
     var scale = d3.scaleSqrt();
@@ -161,9 +219,9 @@ function updateMap(countryData, year){
     scale.range([0, 90]);
     
     var projection = d3.geoPatterson() //need projection in order to get centroid
-    .scale(130)
-    .translate([mapWidth/2, mapHeight/2])
-    .precision(0.01);
+    .scale(125)
+    .translate([mapWidth/2, mapHeight/1.5])
+    .precision(0.1);
 
     var path = d3.geoPath()
     .projection(projection);
@@ -184,7 +242,8 @@ function updateMap(countryData, year){
         countries//.attr("class", "states")
         .selectAll("path")
         .on("click", function(d){
-            countries.selectAll("path").style("fill", "black"); 
+            countries.selectAll("path").style("fill", "#a1a1a1"); 
+            fillPC();
             d3.select(this).style("fill", d3.rgb(100,20,100));
             clearAll();
             selectedCountryObject = d;
@@ -196,9 +255,11 @@ function updateMap(countryData, year){
             //trans(); //commented for faster testing but apparentely redundant
         
         });
+    
     d3.select(".sidePanel")
       .selectAll("rect")
       .on("click", function(d){
+        d3.select(".sidePanel")
            var countKey = getKey(0, false);
            var country = d;
            countCode = countKey[country].code;
@@ -209,7 +270,8 @@ function updateMap(countryData, year){
         countries.selectAll("path").each(function(d,i){
             if(d.id == countCode){
             
-                countries.selectAll("path").style("fill", "black"); 
+                countries.selectAll("path").style("fill", "#a1a1a1"); 
+                fillPC();
                 d3.select(this).style("fill", d3.rgb(100,20,100));
                 clearAll();
                 selectedCountryObject = d;
@@ -240,7 +302,7 @@ function updateMap(countryData, year){
                     // && to exclude initial case where both countryChecker and countryCounter are zero
                     //console.log("update");
                     countryChecker--; //to negate the ++ that will happen above, since this is now a repeat
-                    update(trans()); 
+                    //update(trans()); 
                 } 
                 
 
@@ -252,95 +314,23 @@ function updateMap(countryData, year){
             movingCircles.selectAll("circle").attr("cx", selectedCenter[0]).attr("cy", selectedCenter[1]).on("end", callback);
         };
     
-    
-    
-    
-    
-    
-    
-        
-      /*   function drawBars(countryID, parsedData){
 
-          for(var y1 = 0; y1<parsedData.length; y1++){
-              var lowerString = parsedData[y1].key;
-              var countryName = getKey(countryID,0, true);
-     
-              try{
-            if(lowerString.toLowerCase() == countryName.toLowerCase()) {
-                var numbersOnly = Object.values(parsedData[y1]['perCapitaFoodSupply.csv']['values'][0]);
-                var keys = Object.keys(parsedData[y1]['perCapitaFoodSupply.csv']['values'][0]);
-                
-                numbersOnly = numbersOnly.slice(0, numbersOnly.length-2); //get's rid of country tag
-                keys = keys.slice(0, keys.length-2); //years for axis labels
-                
-                d3.select(".panelSVG").selectAll("rect").remove();
-                
-                
-                d3.select(".panelSVG").selectAll("rect")
-                .data(numbersOnly)
-                .enter()
-                .append("rect") 
-                    .attr("x", function(d, i){return leftMargin-10+(i * (graphWidth / numbersOnly.length) + (graphWidth / numbersOnly.length - barPadding) / 2);})
-                    .attr("y", d => (graphHeight-graphScale(d))-40)
-                    .attr("height", function(d){ 
-                    return graphScale(d)+14;
-                    })
-                    .attr("width", function(d, i){ return graphWidth / numbersOnly.length - (barPadding)})
-                    .style("fill", function(d) {
-return "rgb(0, 0, " + (d * 10) + ")";
-                })
-                
-                
-    var x = d3.scaleLinear()
-          .domain(d3.extent(keys, d => d))
-          .range([leftMargin, graphWidth]);
-    
-    var y = d3.scaleLinear()
-          .domain(d3.extent(numbersOnly, d => d))
-          .range([graphHeight-(bottomMargin), 0]);
-                
-    var xAxis = d3.axisBottom(x).ticks(50);
-    var yAxis = d3.axisLeft(y);
-    var gHeight = graphHeight - bottomMargin;
-    
-      panelSVG.select(".xaxis")
-      .attr("transform", "translate(0,"+ gHeight +")")
-      .call(xAxis);
-         
-      panelSVG.select(".yaxis")
-      .attr("transform", "translate("+leftMargin+",0)")
-      .call(yAxis);
-                
-    
-        break;
-                
-                
-            }}catch(err){
-                console.log(err);
-                alert("No country found with id: " + countryID);//no country with corresponding id; path mixup
-                break;
-            }
-    } 
-    
-    };
-    */
-   
-    function drawBars(countryID, parsedData){
+function drawBars(countryID, parsedData){
+
+
 console.log(parsedData.length);
         d3.select(".panelSVG").remove();
         reDraw();
-
           for(var y1 = 0; y1<parsedData.length; y1++){
               console.log("y1: " + y1);
               var lowerString = parsedData[y1].key;
               var countryName = getKey(countryID,0, true);
               
             try{
-                console.log(lowerString);
-                console.log(countryName);
+                console.log(dataSelect);
             if(lowerString.toLowerCase() == countryName.toLowerCase()) {
-                var numbersOnly = Object.values(parsedData[y1]['perCapitaFoodSupply.csv']['values'][0]);
-                var keys = Object.keys(parsedData[y1]['perCapitaFoodSupply.csv']['values'][0]);
+                var numbersOnly = Object.values(parsedData[y1][dataSelect]['values'][0]);
+                var keys = Object.keys(parsedData[y1][dataSelect]['values'][0]);
                 
                 numbersOnly = numbersOnly.slice(0, numbersOnly.length-2); //get's rid of country tag
                 keys = keys.slice(0, keys.length-2); //years for axis labels
@@ -352,16 +342,15 @@ console.log(parsedData.length);
                 console.log(dataStoreFinal);
                 
 var svg = d3.select(".panelSVG"),
-    margin = {top: 5, right: 5, bottom: 20, left: 50},
-    margin2 = {top: 5, right: 5, bottom: 20, left: 50},
     width = graphWidth;
-    height = (3 * graphHeight)/4;
+    height = (2 * graphHeight)/3;
     height2 = graphHeight/4;
+console.log("graphHeight: " + graphHeight);
 
 var parseDate = d3.timeParse("%Y");
 
 var x = d3.scaleTime().range([0, width]),
-    x2 = d3.scaleTime().range([0, width-graphWidth/3]),
+    x2 = d3.scaleTime().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
     y2 = d3.scaleLinear().range([height2, 0]);
 
@@ -372,6 +361,9 @@ var xAxis = d3.axisBottom(x),
 var brush = d3.brushX()
     .extent([[0, 0], [width, height2]])
     .on("brush end", brushed);
+console.log("width: " + width);
+console.log(typeof width);
+                
 
 var zoom = d3.zoom()
     .scaleExtent([1, Infinity])
@@ -381,13 +373,13 @@ var zoom = d3.zoom()
 
 var area = d3.area()
     .curve(d3.curveMonotoneX)
-    .x(function(d) { return x(d[0]); })
+    .x(function(d) { return x(parseDate(d[0])); })
     .y0(height)
     .y1(function(d) { return y(d[1]); });
 
 var area2 = d3.area()
     .curve(d3.curveMonotoneX)
-    .x(function(d) { return x2(d[0]); })
+    .x(function(d) { return x2(parseDate(d[0])); })
     .y0(height2)
     .y1(function(d) { return y2(d[1]); });
 
@@ -398,15 +390,15 @@ svg.select("#clip")
 
 var focus = svg.append("g")
     .attr("class", "focus")
-    .attr("transform", "translate(" + margin.left + "," + 0 + ")");
+    .attr("transform", "translate(" + margin.left + "," + 30 + ")");
 
 var context = svg.append("g")
     .attr("class", "context")
-    .attr("transform", "translate(" + margin2.left + "," + (3 * graphHeight)/4 + margin2.top + ")");
+    .attr("transform", "translate(" + margin2.left + "," + height + 70 + ")"); //10 px buffer
 
 
-  x.domain([1961, 2011]);
-  y.domain([1500, 3000]);
+  x.domain(d3.extent(keys, function(d){return parseDate(d);}));
+  y.domain(d3.extent(numbersOnly, function(d){return d;}));
   x2.domain(x.domain());
   y2.domain(y.domain());
 
@@ -432,25 +424,26 @@ var context = svg.append("g")
 
   context.append("g")
       .attr("class", "axis axis--x")
-      .attr("transform", "translate(0," + height2 + ")")
-      .call(xAxis2);
+      .attr("transform", "translate(0," + height2 + ")");
+      //.call(xAxis2);
 
   context.append("g")
       .attr("class", "brush")
       .call(brush)
       .call(brush.move, x.range());
 
-  svg.append("rect")
+  /*svg.append("rect")
       .attr("class", "zoom")
-      .attr("width", 40)
+      .attr("width", width)
       .attr("height", height)
       .attr("transform", "translate(" + margin.left + "," + (3 * graphHeight)/4 + margin2.top + ")")
       .call(zoom);
-      break;
+      break;*/
 };
 
 function brushed() {
   if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+    
   var s = d3.event.selection || x2.range();
   x.domain(s.map(x2.invert, x2));
   focus.select(".area").attr("d", area);
@@ -458,6 +451,7 @@ function brushed() {
   svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
       .scale(width / (s[1] - s[0]))
       .translate(-s[0], 0));
+    
 }
 
 function zoomed() {
@@ -468,7 +462,16 @@ function zoomed() {
   focus.select(".axis--x").call(xAxis);
   context.select(".brush").call(brush.move, x.range().map(t.invertX, t)); //t.invertX
 }
-    
+function type(d) {
+  d = parseDate(d);
+  return d;
+}
+                
+d3.select(".panelSVG").selectAll('rect').data(["undernourishment.csv", "perCapitaFoodSupply.csv", "internetUsers.csv", "poverty.csv"]).enter().append('rect').attr("class", "attributeButtons").attr("x", function(d, i){return i * (graphWidth-margin.left-margin.right)/4 + margin.left}).attr("y", 0).attr("width", 20).attr("height", 20).on("click", function(d){ 
+    alert(d);
+    dataSelect = d;
+    drawBars(prevCountry, parsed);
+    });;
      
             }catch(err){
                 console.log(err);
@@ -477,14 +480,7 @@ function zoomed() {
             }
           }
     }; 
-    
 
-        
-    
-    
-    
-    
-    
 
         function drawLines(countryID){
             countryCounter = 0; //reset
@@ -535,7 +531,7 @@ function zoomed() {
                  }
                     size = scale(size);
             
-                 d3.select(this).style("fill", d3.rgb(size, 0, 0));
+                 d3.select(this).style("fill", d3.rgb(size/4, size/6, size));
 
          
             svg.append("line")
@@ -544,7 +540,7 @@ function zoomed() {
                 .attr("x2", selectedCenter[0])
                 .attr("y1", center[1])
                 .attr("y2", selectedCenter[1])
-                .style("stroke", "red")
+                .style("stroke", "blue")
                 .style("stroke-width", size/300)
                 .style("opacity", 0.3);
                 
@@ -565,7 +561,7 @@ function zoomed() {
                 .attr("cx", selectedCenter[0])
                 .attr("cy", selectedCenter[1])
                 .attr("r",size/200)
-                .style("fill", d3.rgb(100, 0, 20))
+                .style("fill", d3.rgb(20, 0, 100))
                 .on("click", trans()); 
 
               });
